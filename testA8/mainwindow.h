@@ -19,16 +19,20 @@ public:
     QGraphicsScene *scene;
     QGraphicsEllipseItem *ellipse;
     QGraphicsRectItem *rect;
+    QGraphicsRectItem *barBoxes[16];
     QGraphicsRectItem *ground;
-    int xpos;
-    int ypos;
+    int xpos[16];
+    int ypos[16];
     int size;
+
+    int ySize[16];
+    int xSize[16];
     float32 timeStep;
     int32 velocityIterations;
     int32 positionIterations;
-    b2FixtureDef fixtureDef;
-    b2PolygonShape dynamicBox;
-    b2Body* body;
+    b2FixtureDef fixtureDef[16];
+    b2PolygonShape dynamicBox[16];
+    b2Body* body[16];
     b2World *world;
     QTimer *timer;
     int increment;

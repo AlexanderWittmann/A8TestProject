@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "Box2D/Box2D.h"
 #include <QGraphicsRectItem>
+#include <cstdlib>
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -11,24 +12,42 @@ MainWindow::MainWindow(QWidget *parent) :
     scene = new QGraphicsScene();
     timer = new QTimer(this);
     connect(timer,SIGNAL(timeout()),this,SLOT(update()));
-    xpos = 0;
-    ypos = -300;
-    size = 50;
+
+    for (int i = 0; i < 16; i++) {
+
+        xpos[i] = (-8 + i)*20;
+        ypos[i] = -300;
+        xSize[i] = 15;
+        ySize[i] = (rand() % 100)*2;
+    }
+
+
+
     ui->graphicsView->setScene(scene);
 
-    QBrush redBrush(Qt::red);
-    QBrush blueBrush(Qt::blue);
+    QBrush blackBrush(Qt::black);
+    QBrush greenBrush(Qt::green);
     QPen blackpen(Qt::black);
 
-    blackpen.setWidth(6);
+    blackpen.setWidth(1);
 
-    ellipse = scene->addEllipse(xpos,ypos,size,size,blackpen,blueBrush);
-    //rect = scene->addRect(xpos,ypos,size,size,blackpen,blueBrush);
-    ground = scene->addRect(-200,-10,400,50,blackpen,redBrush);
+    for (int i = 0; i < 16; i++) {
+        barBoxes[i] = scene->addRect(xpos[i], ypos[i], xSize[i], ySize[i], blackpen, greenBrush);
+    }
+
+//    barBoxes[0] = scene->addRect(-100, -10, 200, 50, blackpen, greenBrush);
+
+//    for (int i = 0; i < 16; i++) {
+//        barBoxes[i] = scene->addRect(-100, -10, 200, 50, blackpen, greenBrush);
+//    }
+
+//    ellipse = scene->addEllipse(xpos,ypos,size,size,blackpen, greenBrush);
+
+    ground = scene->addRect(-200,-10,400,50,blackpen,blackBrush);
 
 
     // Define the gravity vector.
-    gravity = new b2Vec2(0.0f,-10.0f);
+    gravity = new b2Vec2(0.0f,-100.0f);
 
     // Construct a world object, which will hold and simulate the rigid bodies.
     world = new b2World(*gravity);
@@ -52,29 +71,38 @@ MainWindow::MainWindow(QWidget *parent) :
         groundBody->CreateFixture(&groundBox, 0.0f);
 
         // Define the dynamic body. We set its position and call the body factory.
-        b2BodyDef bodyDef;
-        bodyDef.type = b2_dynamicBody;
-        bodyDef.position.Set(0.0f, 300.0f);
-        body = world->CreateBody(&bodyDef);
+        b2BodyDef bodyDef[16];
+        for (int i = 0; i < 16; i++) {
+            bodyDef[i].type = b2_dynamicBody;
+
+            bodyDef[i].position.Set(0.0f, 300.0f);
+            body[i] = world->CreateBody(&bodyDef[i]);
+
+            dynamicBox[i].SetAsBox(xSize[i], ySize[i]);
+
+            fixtureDef[i].shape = &dynamicBox[i];
+
+            // Set the box density to be non-zero, so it will be dynamic.
+            fixtureDef[i].density = 50.0f;
+
+            // Override the default friction.
+            fixtureDef[i].friction = 0.3f;
+
+            fixtureDef[i].restitution = 1.0f;
+
+            // Add the shape to the body.
+            body[i]->CreateFixture(&fixtureDef[i]);
+
+
+        }
 
         // Define another box shape for our dynamic body.
 
-        dynamicBox.SetAsBox(50.0f, 50.0f);
+
 
         // Define the dynamic body fixture.
 
-        fixtureDef.shape = &dynamicBox;
 
-        // Set the box density to be non-zero, so it will be dynamic.
-        fixtureDef.density = 50.0f;
-
-        // Override the default friction.
-        fixtureDef.friction = 0.3f;
-
-        fixtureDef.restitution = 0.8f;
-
-        // Add the shape to the body.
-        body->CreateFixture(&fixtureDef);
 
         // Prepare for simulation. Typically we use a time step of 1/60 of a
         // second (60Hz) and 10 iterations. This provides a high quality simulation
@@ -104,12 +132,22 @@ void MainWindow::update()
     increment += 1;
     world->Step(timeStep, velocityIterations, positionIterations);
 
+    b2Vec2 position[16];
+
     // Now print the position and angle of the body.
-    b2Vec2 position = body->GetPosition();
-    xpos = -(int)position.x;
-    ypos = -(int)position.y;
-    ellipse->setRect(xpos,ypos,size,size);
-    ellipse->setRotation((double)body->GetAngle());
+
+    for (int i = 0; i < 16; i++) {
+        position[i] = body[i]->GetPosition();
+        xpos[i] = -(int)position[i].x + (-8 + i)*20;
+        ypos[i] = -(int)position[i].y - (ySize[i]) + 20;
+        barBoxes[i]->setRect(xpos[i], ypos[i], xSize[i], ySize[i]);
+        barBoxes[i]->setRotation((double)body[i]->GetAngle());
+    }
+
+//    ellipse->setRect(xpos,ypos,size,size);
+//    ellipse->setRotation((double)body->GetAngle());
+//    barBoxes[0]->setRect(xpos[0], ypos[0], 10, 50);
+//    barBoxes[0]->setRotation((double)body->GetAngle());
     if(increment >= 10000){
         timer->stop();
         increment = 0;
