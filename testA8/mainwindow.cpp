@@ -65,7 +65,7 @@ MainWindow::MainWindow(QWidget *parent) :
         b2PolygonShape groundBox;
 
         // The extents are the half-widths of the box.
-        groundBox.SetAsBox(50.0f, 10.0f);
+        groundBox.SetAsBox(1000.0f, 10.0f);
 
         // Add the ground fixture to the ground body.
         groundBody->CreateFixture(&groundBox, 0.0f);
@@ -138,8 +138,8 @@ void MainWindow::update()
 
     for (int i = 0; i < 16; i++) {
         position[i] = body[i]->GetPosition();
-        xpos[i] = -(int)position[i].x + (-8 + i)*20;
-        ypos[i] = -(int)position[i].y - (ySize[i]) + 20;
+        xpos[i] = -(int)position[i].x;
+        ypos[i] = -(int)position[i].y;
         barBoxes[i]->setRect(xpos[i], ypos[i], xSize[i], ySize[i]);
         barBoxes[i]->setRotation((double)body[i]->GetAngle());
     }
