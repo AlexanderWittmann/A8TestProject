@@ -15,8 +15,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     for (int i = 0; i < 16; i++) {
 
-        xpos[i] = (-8 + i)*20;
-        ypos[i] = -300;
+        xpos[i] = (-8 + i)*30;
+        ypos[i] = -250;
         xSize[i] = 15;
         ySize[i] = (rand() % 100)*2;
     }
@@ -43,7 +43,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 //    ellipse = scene->addEllipse(xpos,ypos,size,size,blackpen, greenBrush);
 
-    ground = scene->addRect(-200,-10,400,50,blackpen,blackBrush);
+    ground = scene->addRect(-250,-10,550,50,blackpen,blackBrush);
 
 
     // Define the gravity vector.
@@ -65,7 +65,7 @@ MainWindow::MainWindow(QWidget *parent) :
         b2PolygonShape groundBox;
 
         // The extents are the half-widths of the box.
-        groundBox.SetAsBox(1000.0f, 10.0f);
+        groundBox.SetAsBox(10000.0f, 10.0f);
 
         // Add the ground fixture to the ground body.
         groundBody->CreateFixture(&groundBox, 0.0f);
@@ -75,7 +75,7 @@ MainWindow::MainWindow(QWidget *parent) :
         for (int i = 0; i < 16; i++) {
             bodyDef[i].type = b2_dynamicBody;
 
-            bodyDef[i].position.Set(0.0f, 300.0f);
+            bodyDef[i].position.Set((-8 + i)*30, 300.0f);
             body[i] = world->CreateBody(&bodyDef[i]);
 
             dynamicBox[i].SetAsBox(xSize[i], ySize[i]);
@@ -83,12 +83,12 @@ MainWindow::MainWindow(QWidget *parent) :
             fixtureDef[i].shape = &dynamicBox[i];
 
             // Set the box density to be non-zero, so it will be dynamic.
-            fixtureDef[i].density = 50.0f;
+            fixtureDef[i].density = 600.0f;
 
             // Override the default friction.
-            fixtureDef[i].friction = 0.3f;
+            fixtureDef[i].friction = 0.0f;
 
-            fixtureDef[i].restitution = 1.0f;
+            fixtureDef[i].restitution = .6f;
 
             // Add the shape to the body.
             body[i]->CreateFixture(&fixtureDef[i]);
@@ -148,7 +148,7 @@ void MainWindow::update()
 //    ellipse->setRotation((double)body->GetAngle());
 //    barBoxes[0]->setRect(xpos[0], ypos[0], 10, 50);
 //    barBoxes[0]->setRotation((double)body->GetAngle());
-    if(increment >= 10000){
+    if(increment >= 430){
         timer->stop();
         increment = 0;
     }
